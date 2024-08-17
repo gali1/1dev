@@ -1,63 +1,42 @@
-name: Deploy static content to Pages
+name: Deploy static content to GitHub Pages
 
 on:
-  # Runs on pushes targeting the default branch
+  # Trigger the workflow on push events to the main branch
   push:
-    branches: ["main"]
-
-  # Allows you to run this workflow manually from the Actions tab
+    branches:
+      - main
+  # Trigger the workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
-  id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
+  # Ensure only one deployment is running at a time for Pages
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-
+    environment:
+      name: GitHub Pages
+      url: ${{ steps.deploy-pages.outputs.url }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Cache Build Artifacts
-        id: cache
-        uses: actions/cache@v4
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          path: ./.cache
-          key: ${{ runner.os }}-build-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-build-
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Build Project
-        run: |
-          # Replace this with your build command
-          echo "Building project..."
-          mkdir -p .cache
-          # Here, simulate build artifacts being stored in .cache
-          echo "Build completed" > .cache/build.txt
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+          node-version: '14'
+      - name: Build and deploy
+        id: deploy-pages
+        uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
-          # Upload the directory where your static content is located
-          path: '.'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v3
+          # Set the GitHub token for deployments
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # Configure the directory to deploy (change as needed)
+          source: ./dist # Adjust based on your build output
+          # Configure the target branch (gh-pages in this case)
+          branch: gh-pages
