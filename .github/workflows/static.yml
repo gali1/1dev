@@ -1,47 +1,24 @@
 name: Deploy static content to GitHub Pages
 
 on:
-  # Trigger the workflow on push events to the main branch
   push:
     branches:
       - main
-  # Trigger the workflow manually from the Actions tab
   workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
 
-concurrency:
-  # Ensure only one deployment is running at a time for Pages
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: GitHub Pages
-      url: ${{ steps.deploy-pages.outputs.url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14' # Adjust to your Node.js version
-
-      - name: Install dependencies
-        run: npm install  # Replace with your dependency installation command if needed
-
-      - name: Build static site
-        run: npm run build  # Replace with your build command
-
       - name: Deploy to GitHub Pages
-        id: deploy-pages
-        uses: JamesIves/github-pages-deploy-action@4.1.4
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: gh-pages
-          folder: ./build  # Adjust based on your actual build output directory
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./  # Path to your index.html file or directory containing index.html
