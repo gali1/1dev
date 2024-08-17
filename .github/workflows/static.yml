@@ -26,17 +26,22 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Set up Node.js
+      
+      - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
-      - name: Build and deploy
+          node-version: '14' # Adjust to your Node.js version
+
+      - name: Install dependencies
+        run: npm install  # Replace with your dependency installation command if needed
+
+      - name: Build static site
+        run: npm run build  # Replace with your build command
+
+      - name: Deploy to GitHub Pages
         id: deploy-pages
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
-          # Set the GitHub token for deployments
           token: ${{ secrets.GITHUB_TOKEN }}
-          # Configure the directory to deploy (change as needed)
-          source: ./dist # Adjust based on your build output
-          # Configure the target branch (gh-pages in this case)
           branch: gh-pages
+          folder: ./build  # Adjust based on your actual build output directory
